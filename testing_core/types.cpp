@@ -51,13 +51,17 @@ namespace MyTypes {
         return res;
     }
 
-    std::vector<uint8_t> createRandomColorImage() {
-        cv::Mat img = cv::Mat::zeros(cv::Size(640,480), CV_8UC3);
+    cv::Mat createRandomColorImage() {
+        cv::Mat img = cv::Mat::zeros(cv::Size(3840, 2160), CV_8UC3);
         cv::randu(img, 0, 255);
 
+        return img;
+    }
+
+    std::vector<uint8_t> createRandomColorImageBuffer(){
+        const cv::Mat img = createRandomColorImage();
         std::vector<uint8_t> buffer;
         cv::imencode(".png", img, buffer);
-
         return buffer;
     }
 
@@ -72,19 +76,20 @@ namespace MyTypes {
         res.mana = std::abs(rand_nr(e) % 500);
         static_assert(std::is_copy_constructible<engine>::value, "");
         std::generate_n(std::back_inserter(res.inventory), rand_len(e), std::bind(rand_len, std::ref(e)));
+
         std::generate_n(std::back_inserter(res.path), rand_len(e), [&]() {
             return Vec3{rand_float(e), rand_float(e), rand_float(e)};
         });
         res.equipped = createRandomWeapon(e);
         std::generate_n(std::back_inserter(res.weapons), rand_len(e), std::bind(createRandomWeapon, std::ref(e)));
-        res.image = createRandomColorImage();
+        res.image = createRandomColorImageBuffer();
         return res;
     }
 
     std::vector<MyTypes::Monster> createMonsters(size_t count) {
         std::vector<MyTypes::Monster> res{};
         //always the same seed
-        std::seed_seq seed{1,2,3};
+        std::seed_seq seed{1, 2, 3};
         engine e{seed};
 
         std::generate_n(std::back_inserter(res), count, std::bind(createRandomMonster, std::ref(e)));
